@@ -79,6 +79,71 @@ InstallMethod( ConcreteCategoryForCAP,
 end );
 
 ##
+InstallMethod( ConcreteCategoryForCAP,
+        "for two integers",
+        [ IsInt, IsInt ],
+        
+  function( n, m )
+	local objects, gmorphisms, permute, j, k, list, C;
+  objects := [];
+  for j in [1..n] do
+    objects[j] := FinSet([1+(j-1)*m..j*m]);
+  od;
+  gmorphisms := [];
+  permute := function(o, j, m)
+    local r;
+    r := RemInt( o+1, m );
+    if r > 0 then
+      return (r+(j-1)*m);
+    else
+      return j*m;
+    fi;
+  end;
+  for j in [1..n] do
+    for k in [j..n] do
+		if j = k then
+		    Add( gmorphisms, MapOfFinSets( objects[j], 
+				List( objects[j], o-> [o, permute(o,j,m) ] ),
+				objects[k]) );
+		else # k > j
+			Add( gmorphisms, MapOfFinSets( objects[j],
+				List( objects[j], o -> [o, o+(k-j)*m] ),
+				objects[k]) );
+		fi;
+	od;
+  od;
+  
+    DeactivateCachingOfCategory( FinSets );
+    CapCategorySwitchLogicOff( FinSets );
+    DisableSanityChecks( FinSets );
+    
+    C := Subcategory( FinSets, "A finite concrete category" : overhead := false, FinalizeCategory := false );
+	
+	DeactivateCachingOfCategory( C );
+    CapCategorySwitchLogicOff( C );
+    DisableSanityChecks( C );
+	
+	SetFilterObj( C, IsFiniteConcreteCategory );
+	
+	AddIsAutomorphism( C,
+      function( alpha )
+        return IsAutomorphism( UnderlyingCell( alpha ) );
+    end );
+	
+	AddInverse( C,
+      function( alpha )
+        return Inverse( UnderlyingCell( alpha ) ) / CapCategory( alpha );
+    end );
+	
+	SetSetOfObjects( C, List( objects, o-> o / C ) );
+	SetSetOfGeneratingMorphisms( C, List( gmorphisms, g-> g / C ) );
+	
+    Finalize( C );
+    
+    return C;
+end );
+
+##
 InstallMethod( Algebroid,
         "for a homalg ring and a finite category",
         [ IsHomalgRing and IsCommutative, IsFiniteConcreteCategory ],

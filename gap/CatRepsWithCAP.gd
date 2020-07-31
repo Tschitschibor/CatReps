@@ -92,6 +92,15 @@ DeclareOperation( "ConcreteCategoryForCAP",
 #! @InsertChunk ConcreteCategoryForCAP
 
 #! @Description
+#!  Construct finite concrete category with n objects, each a FinSet with m elements.
+#!  Generating morphisms are one endomorphism each of order m, and the one-directional
+#!  bijections between the sets which give a total order on the set of objects.
+#! @Arguments n, m
+#! @Returns a &CAP; object
+DeclareOperation( "ConcreteCategoryForCAP",
+        [ IsInt, IsInt ] );
+
+#! @Description
 #!  Return the <A>k</A>-linear closure of the category <A>C</A>
 #!  over the commutative ring <A>k</A>.
 #! @Arguments k, C
