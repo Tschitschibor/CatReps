@@ -1,19 +1,27 @@
-version: 2.1
+name: Tests
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
+
 jobs:
   test:
-    parameters:
-      docker_image:
-        type: string
-    docker:
-      - image: << parameters.docker_image >>:latest
-    working_directory: ~/.gap/pkg/CatReps
+    strategy:
+      matrix:
+        image: [gapsystem/gap-docker, gapsystem/gap-docker-master]
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.image }}
     steps:
-      - checkout
+      - uses: actions/checkout@v1
+      - run: mkdir -p /home/gap/.gap/pkg/
+      - run: sudo cp -a $GITHUB_WORKSPACE /home/gap/.gap/pkg/
+      - run: sudo chown -R gap:gap /home/gap/.gap/pkg/
       - run: |
-          sudo apt update
-          sudo apt dist-upgrade -y
-          sudo apt install -y texlive-latex-extra texlive-science curl
-          cd ..
+          export HOME="/home/gap"
+          cd /home/gap/.gap/pkg/
           git clone --depth 1 https://github.com/homalg-project/homalg_project.git
           git clone --depth 1 https://github.com/homalg-project/CAP_project
           git clone --depth 1 https://github.com/homalg-project/CategoryConstructor
@@ -25,23 +33,5 @@ jobs:
           git clone --depth 1 https://github.com/homalg-project/FunctorCategories
           git clone --depth 1 https://github.com/homalg-project/SubcategoriesForCAP
           cd CatReps
-          TERM=dumb make ci-test
-          bash <(curl -s https://codecov.io/bash)
-workflows:
-  version: 2
-  commit:
-    jobs:
-      - test:
-          docker_image: gapsystem/gap-docker
-  nightly:
-    triggers:
-      - schedule:
-          # 0:00 UTC = 1:00 CET = 2:00 CEST
-          cron: "0 0 * * *"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - test:
-          docker_image: gapsystem/gap-docker-master
+          TERM=dumb make -j $(nproc) --output-sync ci-test
+          curl -s https://codecov.io/bash | bash
