@@ -1,23 +1,7 @@
 
 Read("../CategoryOfRepresentations.g");
+Read("/mnt/c/Users/Tibor/Dropbox/wd/wd_Gap/normalize.g");
 
-e12 := 1;; e13 := 0;; e42 := 1;; e43 := 1;;
-f12 := 0;; f13 := -e12;; f43 := e12-e42;;
-
-emat := [
-[0, e12, e13],
-[0, 0, e12],
-[0, 0, 0],
-[0, e42, e43],
-[0, 0, e42]
-];;
-
-fmat := [
-[0, f12, -e12],
-[0, 0, -e12],
-[0, 0, 0],
-[0, 0, e12-e42]
-];;
 
 eta := [
  VectorSpaceMorphism(
